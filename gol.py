@@ -41,8 +41,8 @@ def load_board(filename, board):
 
 def new_board(screen_width, screen_height):
     """
-    creat empty board
-    """
+    create empty board
+    """    
     return [[0 for i in range(screen_width)] for j in range(screen_height)]
 
 
@@ -53,15 +53,42 @@ def draw_board(screen, board):
     """
     global options
 
-    chars = {0:' ', 1:'#'}
+    chars = {
+            0:' ', 
+            1:'#', 
+            2:'*',
+            3:'o',
+            4:'`',
+            5:'"',
+            6:"'",
+            7:'-',
+            8:'.',
+            }
 
-    color_to_use = 0
+    color = 0
     if options.color:
-        color_to_use = curses.color_pair(1)
+        colors ={
+                0:curses.color_pair(1),
+                1:curses.color_pair(1),
+                2:curses.color_pair(2),
+                3:curses.color_pair(3),
+                4:curses.color_pair(4),
+                5:curses.color_pair(1),
+                6:curses.color_pair(2),
+                7:curses.color_pair(3),
+                8:curses.color_pair(4),
+        }
+
 
     for row in range(len(board)):
         for col in range(len(board[0])):
-            screen.addstr(row, col*2, chars[board[row][col]], color_to_use)
+
+            spot = board[row][col]
+            char = chars[spot]
+            if options.color:
+                color = colors[spot]
+
+            screen.addstr(row, col*2, char, color)
 
 
 def check_life(screen, board):
@@ -94,16 +121,48 @@ def check_life(screen, board):
                     if check_col == len(board[0]):
                         check_col = 0
 
-                    if board[check_row][check_col] == 1:
+                    #if board[check_row][check_col] == 1:
+                    if board[check_row][check_col] >= 1:
                         live_neighbors += 1
 
+            if board[row][col] == 0 and live_neighbors == 3:
+                nextboard[row][col] = 1
+
+            elif board[row][col] > 0:
+                # checking for 3 or 4 since actual cell was counted as a neighbor
+                if  live_neighbors in [3,4]:
+                    nextboard[row][col] += live_neighbors
+
+ 
+    return nextboard
+
+def acheck_life(screen, board):
+    nextboard=new_board(len(board[0]),len(board))
+    for row in range(len(board)):
+        for col in range(len(board[0])):
+            live_neighbors=0
+            # checking neighbors
+            for row_offset in [-1,0,1]:
+                for col_offset in [-1,0,1]:
+                    check_row = row+row_offset
+                    if check_row < 0:
+                        check_row = len(board)-1
+                    if check_row == len(board):
+                        check_row = 0
+                    check_col = col+col_offset
+                    if check_col < 0:
+                        check_col = len(board[0])-1
+                    if check_col == len(board[0]):
+                        check_col = 0
+                    if board[check_row][check_col]==1:
+                        live_neighbors+=1
             if board[row][col]==0:
                 if live_neighbors==3:
-                    nextboard[row][col] = 1
+                    nextboard[row][col]=1
             else:
                 # checking for 3 or 4 since actual cell was counted as a neighbor
-                if  3 <= live_neighbors <= 4:
-                    nextboard[row][col] = 1
+                if live_neighbors==3 or live_neighbors==4:
+                    nextboard[row][col]=1
 
     return nextboard
 
@@ -119,6 +178,11 @@ def main(screen, pause_between_frames, filename):
         #Get some color settings in the works
         curses.start_color()
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
+
 
 
     board = load_board(filename,new_board(screen_width,screen_height))
