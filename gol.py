@@ -8,7 +8,7 @@ from optparse import OptionParser
 """
 This is a python, curses implimentation of Conway's game of life
 v1.0 (2010-05-15)
-by Daniel Thau
+by Daniel Thau, Morgan Goose
 Licensed under the GPLv2
 """
 
