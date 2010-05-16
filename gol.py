@@ -59,7 +59,8 @@ def _rle_board(filename, board):
     with open(filename) as rle_file:
         loaded_rle = rle_file.readlines()
 
-    
+   
+    pattern = []
     for line in loaded_rle:
         if not line.startswith("#"):
             if line.startswith("x"):
@@ -68,13 +69,21 @@ def _rle_board(filename, board):
                 else:
                    x, y = line.split(',')
             else:
-                pattern = line.split("$")
+                pattern.extend(line.split("$"))
 
     cols = int(x.split("=")[-1])
     rows = int(y.split("=")[-1])
 
-    row_offset = (len(board) - rows)/2
-    col_offset = (len(board[0]) - cols)/2
+    if cols > len(board[0]) or rows > len(board):
+        raise Exception("\nPattern too large:\n\trows: %s\n\tcols: %s\
+                \nwhere:\n\tx: %s\n\ty: %s" % (
+                    rows, cols, len(board), len(board[0])))
+
+    row_offset = col_offset = 0
+    if cols/2 < len(board[0]) and rows/2 < len(board):
+        row_offset = (len(board) - rows)/2
+        col_offset = (len(board[0]) - cols)/2
+
     trans = {'b':0, 'o':1}
 
     row = 0
@@ -211,35 +220,6 @@ def check_life(screen, board):
  
     return nextboard
 
-def acheck_life(screen, board):
-    nextboard=new_board(len(board[0]),len(board))
-    for row in range(len(board)):
-        for col in range(len(board[0])):
-            live_neighbors=0
-            # checking neighbors
-            for row_offset in [-1,0,1]:
-                for col_offset in [-1,0,1]:
-                    check_row = row+row_offset
-                    if check_row < 0:
-                        check_row = len(board)-1
-                    if check_row == len(board):
-                        check_row = 0
-                    check_col = col+col_offset
-                    if check_col < 0:
-                        check_col = len(board[0])-1
-                    if check_col == len(board[0]):
-                        check_col = 0
-                    if board[check_row][check_col]==1:
-                        live_neighbors+=1
-            if board[row][col]==0:
-                if live_neighbors==3:
-                    nextboard[row][col]=1
-            else:
-                # checking for 3 or 4 since actual cell was counted as a neighbor
-                if live_neighbors==3 or live_neighbors==4:
-                    nextboard[row][col]=1
-
-    return nextboard
 
 def main(screen, pause_between_frames, filename):
     """
