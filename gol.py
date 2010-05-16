@@ -138,6 +138,7 @@ def draw_board(screen, board):
             6:"'",
             7:'-',
             8:'.',
+            9:'x',
             }
 
     color = 0
@@ -152,6 +153,7 @@ def draw_board(screen, board):
                 6:curses.color_pair(2),
                 7:curses.color_pair(3),
                 8:curses.color_pair(4),
+                9:curses.color_pair(5),
         }
 
 
@@ -159,6 +161,8 @@ def draw_board(screen, board):
         for col in range(len(board[0])):
 
             spot = board[row][col]
+            if spot>9:
+              spot=9
             char = chars[spot]
             if options.color:
                 color = colors[spot]
@@ -166,7 +170,52 @@ def draw_board(screen, board):
             screen.addstr(row, col*2, char, color)
 
 
-def check_life(screen, board):
+def check_life_simple(screen, board):
+    """
+    follows Conway's Game of Life rules to determine which cells
+    are alive in the next frame
+    """
+    nextboard=new_board(len(board[0]),len(board))
+    for row in range(len(board)):
+        for col in range(len(board[0])):
+            live_neighbors = 0
+
+            # checking neighbors
+            for row_offset in [-1,0,1]:
+                for col_offset in [-1,0,1]:
+
+                    check_row = row+row_offset
+
+                    if check_row < 0:
+                        check_row = len(board)-1
+
+                    if check_row == len(board):
+                        check_row = 0
+
+                    check_col = col+col_offset
+
+                    if check_col < 0:
+                        check_col = len(board[0])-1
+
+                    if check_col == len(board[0]):
+                        check_col = 0
+
+                    #if board[check_row][check_col] == 1:
+                    if board[check_row][check_col] >= 1:
+                        live_neighbors += 1
+
+            if board[row][col] == 0 and live_neighbors == 3:
+                nextboard[row][col] = 1
+
+            elif board[row][col] > 0:
+                # checking for 3 or 4 since actual cell was counted as a neighbor
+                if  live_neighbors in [3,4]:
+                    nextboard[row][col] = 1
+
+ 
+    return nextboard
+
+def check_life_neighbor(screen, board):
     """
     follows Conway's Game of Life rules to determine which cells
     are alive in the next frame
@@ -211,34 +260,49 @@ def check_life(screen, board):
  
     return nextboard
 
-def acheck_life(screen, board):
+def check_life_lifetime(screen, board):
+    """
+    follows Conway's Game of Life rules to determine which cells
+    are alive in the next frame
+    """
     nextboard=new_board(len(board[0]),len(board))
     for row in range(len(board)):
         for col in range(len(board[0])):
-            live_neighbors=0
+            live_neighbors = 0
+
             # checking neighbors
             for row_offset in [-1,0,1]:
                 for col_offset in [-1,0,1]:
+
                     check_row = row+row_offset
+
                     if check_row < 0:
                         check_row = len(board)-1
+
                     if check_row == len(board):
                         check_row = 0
+
                     check_col = col+col_offset
+
                     if check_col < 0:
                         check_col = len(board[0])-1
+
                     if check_col == len(board[0]):
                         check_col = 0
-                    if board[check_row][check_col]==1:
-                        live_neighbors+=1
-            if board[row][col]==0:
-                if live_neighbors==3:
-                    nextboard[row][col]=1
-            else:
-                # checking for 3 or 4 since actual cell was counted as a neighbor
-                if live_neighbors==3 or live_neighbors==4:
-                    nextboard[row][col]=1
 
+                    #if board[check_row][check_col] == 1:
+                    if board[check_row][check_col] >= 1:
+                        live_neighbors += 1
+
+            if board[row][col] == 0 and live_neighbors == 3:
+                nextboard[row][col] = 1
+
+            elif board[row][col] > 0:
+                # checking for 3 or 4 since actual cell was counted as a neighbor
+                if  live_neighbors in [3,4]:
+                    nextboard[row][col] = board[row][col]+1
+
+ 
     return nextboard
 
 def main(screen, pause_between_frames, filename):
@@ -264,11 +328,15 @@ def main(screen, pause_between_frames, filename):
 
     while True:
         draw_board(screen, board)
-        board = check_life(screen, board)
+        if options.system=="0":
+          board = check_life_simple(screen, board)
+        if options.system=="1":
+          board = check_life_neighbor(screen, board)
+        if options.system=="2":
+          board = check_life_lifetime(screen, board)
         screen.refresh()
         if pause_between_frames:
           screen.getch()
-
 
 
 if __name__ == '__main__':
@@ -283,7 +351,11 @@ if __name__ == '__main__':
 
     parser.add_option("-c", "--color", dest="color",
             default=False, action="store_true",
-            help="turn on the curses colors.")
+            help="sets whether to enable color or not.")
+
+    parser.add_option("-s", "--system", dest="system",
+            default="0", action="store", metavar="#",
+            help="determines which system will set character/color (0=disabled, 1=neighbors, 2=lifetime).")
 
     parser.add_option("-f", "--format", dest="file_format",
             default="", action="store", metavar="FMT",
