@@ -161,7 +161,7 @@ def draw_board(screen, board):
         for col in range(len(board[0])):
 
             spot = board[row][col]
-            if spot>9:
+            if spot>9: # ensures lifetime variable doesn't excede available rendering range
               spot=9
             char = chars[spot]
             if options.color:
@@ -173,7 +173,8 @@ def draw_board(screen, board):
 def check_life_simple(screen, board):
     """
     follows Conway's Game of Life rules to determine which cells
-    are alive in the next frame
+    are alive in the next frame.  Does not keep track of anything
+    more than life/death.
     """
     nextboard=new_board(len(board[0]),len(board))
     for row in range(len(board)):
@@ -218,7 +219,8 @@ def check_life_simple(screen, board):
 def check_life_neighbor(screen, board):
     """
     follows Conway's Game of Life rules to determine which cells
-    are alive in the next frame
+    are alive in the next frame.  Keeps track of the number of
+    living neighbors.
     """
     nextboard=new_board(len(board[0]),len(board))
     for row in range(len(board)):
@@ -263,7 +265,8 @@ def check_life_neighbor(screen, board):
 def check_life_lifetime(screen, board):
     """
     follows Conway's Game of Life rules to determine which cells
-    are alive in the next frame
+    are alive in the next frame.  Keeps track of the number of
+    frames a cell has been alive
     """
     nextboard=new_board(len(board[0]),len(board))
     for row in range(len(board)):
@@ -328,11 +331,11 @@ def main(screen, pause_between_frames, filename):
 
     while True:
         draw_board(screen, board)
-        if options.system=="0":
+        if options.track=="0": # only tracks life
           board = check_life_simple(screen, board)
-        if options.system=="1":
+        if options.track=="1": # tracks neighbors
           board = check_life_neighbor(screen, board)
-        if options.system=="2":
+        if options.track=="2": # tracks lifetime
           board = check_life_lifetime(screen, board)
         screen.refresh()
         if pause_between_frames:
@@ -353,9 +356,9 @@ if __name__ == '__main__':
             default=False, action="store_true",
             help="sets whether to enable color or not.")
 
-    parser.add_option("-s", "--system", dest="system",
+    parser.add_option("-t", "--track", dest="track",
             default="0", action="store", metavar="#",
-            help="determines which system will set character/color (0=disabled, 1=neighbors, 2=lifetime).")
+            help="sets what to track (0=disabled, 1=neighbors, 2=lifetime).")
 
     parser.add_option("-f", "--format", dest="file_format",
             default="", action="store", metavar="FMT",
