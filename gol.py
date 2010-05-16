@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import os
 import sys
+import string
 import curses
+import itertools
 
 from optparse import OptionParser
 
@@ -16,6 +18,79 @@ def load_board(filename, board):
     """
     loads the file argument into the board
     """
+    global options
+
+    if filename.endswith(".gol") or options.file_format == "glo":
+        return _explicit_board(filename, board)
+
+    elif filename.endswith(".rle") or options.file_format == "rle":
+        return _rle_board(filename, board)
+
+    else:
+        raise Exception("Do not know board format.")
+
+def _decode(line):
+    """
+    Take encoded string and return expanded form
+    """
+    decoded, counting = "", ""
+
+    for c in list(line):
+        if c in ["b", "o"] and not counting:
+            decoded += c
+
+        elif c in ["b", "o"] and counting:
+            decoded += c*int(counting)
+            counting = ""
+            
+        elif c in string.digits:
+            counting += c
+
+                    
+    return decoded            
+            
+
+def _rle_board(filename, board):
+    """
+    Lets us use the rle format as explained here:
+        http://conwaylife.com/wiki/index.php?title=RLE
+    """
+
+    with open(filename) as rle_file:
+        loaded_rle = rle_file.readlines()
+
+    
+    for line in loaded_rle:
+        if not line.startswith("#"):
+            if line.startswith("x"):
+                if "rule" in line:
+                   x, y, rule = line.split(',')
+                else:
+                   x, y = line.split(',')
+            else:
+                pattern = line.split("$")
+
+    cols = int(x.split("=")[-1])
+    rows = int(y.split("=")[-1])
+
+    row_offset = (len(board) - rows)/2
+    col_offset = (len(board[0]) - cols)/2
+    trans = {'b':0, 'o':1}
+
+    row = 0
+    for line in pattern:
+        col = 0
+        decoded = _decode(line)
+        for char in decoded:
+            if char in ['b', 'o']:
+                board[row+row_offset][col+col_offset] = trans[char]
+            col += 1
+        row += 1
+
+    return board                
+        
+
+def _explicit_board(filename, board):
     with open(filename,'r') as f:
         loaded_file = f.readlines()
 
@@ -206,10 +281,17 @@ if __name__ == '__main__':
     parser = OptionParser()
 
     parser.add_option("-p", "--pause", dest="pause_between_frames",
-            default=False, action="store_true")
+            default=False, action="store_true",
+            help="pause for input between frames.")
 
     parser.add_option("-c", "--color", dest="color",
-            default=False, action="store_true")
+            default=False, action="store_true",
+            help="turn on the curses colors.")
+
+    parser.add_option("-f", "--format", dest="file_format",
+            default="", action="store", metavar="FMT",
+            help="will take either glo or rle as options.")
+
 
     (options, args) = parser.parse_args()
 
@@ -221,6 +303,10 @@ if __name__ == '__main__':
 
         else:
             files.append(arg)
+
+    if not files:
+        print "No files given, quitting."
+        sys.exit()
 
     curses.wrapper(main, options.pause_between_frames, files[0])
 
