@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
 import os
 import sys
 import string
@@ -262,15 +262,12 @@ def main(screen, pause_between_frames, filename):
 
     board = load_board(filename,new_board(screen_width,screen_height))
 
-    if pause_between_frames:
-        while screen.getch()!=ord('q'):
-            draw_board(screen, board)
-            board = check_life(screen,board)
-    else:
-        while True:
-            draw_board(screen, board)
-            board = check_life(screen, board)
-            screen.refresh()
+    while True:
+        draw_board(screen, board)
+        board = check_life(screen, board)
+        screen.refresh()
+        if pause_between_frames:
+          screen.getch()
 
 
 
