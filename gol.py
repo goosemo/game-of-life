@@ -20,7 +20,7 @@ def load_board(filename, board):
     """
     global options
 
-    if filename.endswith(".gol") or options.file_format == "glo":
+    if filename.endswith(".gol") or options.file_format == "gol":
         return _explicit_board(filename, board)
 
     elif filename.endswith(".rle") or options.file_format == "rle":
@@ -359,7 +359,7 @@ if __name__ == '__main__':
 
     parser.add_option("-f", "--format", dest="file_format",
             default="", action="store", metavar="FMT",
-            help="will take either glo or rle as options.")
+            help="will take either gol or rle as options.")
 
 
     (options, args) = parser.parse_args()
