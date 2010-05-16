@@ -18,10 +18,12 @@ def load_board(filename, board):
     """
     loads the file argument into the board
     """
-    if filename.endswith(".gol"):
+    global options
+
+    if filename.endswith(".gol") or options.file_format == "glo":
         return _explicit_board(filename, board)
 
-    elif filename.endswith(".rle"):
+    elif filename.endswith(".rle") or options.file_format == "rle":
         return _rle_board(filename, board)
 
     else:
@@ -279,10 +281,17 @@ if __name__ == '__main__':
     parser = OptionParser()
 
     parser.add_option("-p", "--pause", dest="pause_between_frames",
-            default=False, action="store_true")
+            default=False, action="store_true",
+            help="pause for input between frames.")
 
     parser.add_option("-c", "--color", dest="color",
-            default=False, action="store_true")
+            default=False, action="store_true",
+            help="turn on the curses colors.")
+
+    parser.add_option("-f", "--format", dest="file_format",
+            default="", action="store", metavar="FMT",
+            help="will take either glo or rle as options.")
+
 
     (options, args) = parser.parse_args()
 
@@ -294,6 +303,10 @@ if __name__ == '__main__':
 
         else:
             files.append(arg)
+
+    if not files:
+        print "No files given, quitting."
+        sys.exit()
 
     curses.wrapper(main, options.pause_between_frames, files[0])
 
