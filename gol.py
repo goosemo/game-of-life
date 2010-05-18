@@ -371,6 +371,14 @@ if __name__ == '__main__':
 
     parser = OptionParser()
 
+    def _check_len(option, opt_str, value, parser):
+        print option, opt_str, value, parser
+
+        if len(value) != 1:
+            parser.error("%s value invalid for this option. Need single char" % value)
+            
+        setattr(parser.values, option.dest, value)
+
     parser.add_option("-p", "--pause", dest="pause_between_frames",
             default=False, action="store_true",
             help="pause for input between frames.")
@@ -388,11 +396,17 @@ if __name__ == '__main__':
             help="will take either gol or rle as options.")
 
     parser.add_option("-b", "--background", dest="background",
-            default="", action="store", metavar="CHAR",
+            #default="", action="store", metavar="CHAR",
+            #help="sets the background character")
+            default="", action="callback", callback=_check_len,
+            metavar="CHAR", nargs=1, type='string',
             help="sets the background character")
 
     parser.add_option("-f", "--foreground", dest="foreground",
-            default="", action="store", metavar="CHAR",
+            #default="", action="store", metavar="CHAR",
+            #help="sets the foreground character")
+            default="", action="callback", callback=_check_len,
+            metavar="CHAR", nargs=1, type='string',
             help="sets the foreground character")
 
     parser.add_option("-d", "--random", dest="random",
