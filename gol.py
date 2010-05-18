@@ -341,13 +341,13 @@ def main(screen, pause_between_frames, filename):
     if options.color:
         #Get some color settings in the works
         curses.start_color()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
-        curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
-        curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
-        curses.init_pair(6, curses.COLOR_RED, curses.COLOR_BLACK)
 
+        colors = [curses.COLOR_GREEN, curses.COLOR_YELLOW, curses.COLOR_BLUE,
+                curses.COLOR_CYAN, curses.COLOR_WHITE, curses.COLOR_RED]
+        black = curses.COLOR_BLACK
+
+        for i, (color, bg) in enumerate([(c, black) for c in colors], start=1):
+            curses.init_pair(i, color, bg)
 
     board = load_board(filename,new_board(screen_width,screen_height))
 
@@ -355,7 +355,7 @@ def main(screen, pause_between_frames, filename):
             0: check_life_simple,
             1: check_life_neighbor,
             2: check_life_lifetime,
-            'life': check_life_simple,
+            'simple': check_life_simple,
             'neighbor': check_life_neighbor,
             'lifetime': check_life_lifetime,
             }.get(options.track, check_life_simple)
@@ -384,7 +384,7 @@ if __name__ == '__main__':
 
     parser.add_option("-t", "--track", dest="track",
             default="0", action="store", metavar="#",
-            help="sets what to track (0=disabled, 1=neighbors, 2=lifetime).")
+            help="sets what to track (0=simple, 1=neighbors, 2=lifetime).")
 
     parser.add_option("-o", "--format", dest="file_format",
             default="", action="store", metavar="FMT",
