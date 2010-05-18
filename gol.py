@@ -130,39 +130,25 @@ def new_board(screen_width, screen_height):
     return [[0 for i in range(screen_width)] for j in range(screen_height)]
 
 
-
 def draw_board(screen, board):
     """
     draw board onto screen
     """
     global options
 
-    if options.foreground==' ':
-      chars = {
-          0:' ', 
-          1:'#', 
-          2:'*',
-          3:'o',
-          4:'`',
-          5:'"',
-          6:"'",
-          7:'-',
-          8:'.',
-          9:'x'}
-    else:
-      chars = {
-          0:' ', 
-          1:options.foreground, 
-          2:options.foreground, 
-          3:options.foreground, 
-          4:options.foreground, 
-          5:options.foreground, 
-          6:options.foreground, 
-          7:options.foreground, 
-          8:options.foreground,
-          9:options.foreground}
+    chars = {
+            0:' ', 1:'#', 2:'*', 3:'o',
+            4:'`', 5:'"', 6:"'", 7:'-',
+            8:'.', 9:'x',
+            }
 
-    chars[0] = options.background
+    if options.foreground:
+        for key in chars.keys():
+            if key:
+                chars[key] = options.foreground
+    
+    if options.background:
+        chars[0] = options.background
 
     color = 0
     if options.color:
@@ -182,9 +168,10 @@ def draw_board(screen, board):
     for row in range(len(board)):
         for col in range(len(board[0])):
 
-            spot = board[row][col]
-            if spot>9: # ensures lifetime variable doesn't excede available rendering range
-              spot=9
+            spot = board[row][col]            
+            # ensures lifetime variable doesn't excede available rendering range
+            spot = 9 if spot>9 else spot
+
             char = chars[spot]
             if options.color:
                 color = colors[spot]
@@ -391,11 +378,11 @@ if __name__ == '__main__':
             help="will take either gol or rle as options.")
 
     parser.add_option("-b", "--background", dest="background",
-            default=" ", action="store", metavar="CHAR",
+            default="", action="store", metavar="CHAR",
             help="sets the background character")
 
     parser.add_option("-f", "--foreground", dest="foreground",
-            default=" ", action="store", metavar="CHAR",
+            default="", action="store", metavar="CHAR",
             help="sets the foreground character")
 
     (options, args) = parser.parse_args()
