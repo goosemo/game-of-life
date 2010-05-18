@@ -351,14 +351,18 @@ def main(screen, pause_between_frames, filename):
 
     board = load_board(filename,new_board(screen_width,screen_height))
 
+    check_func = {
+            0: check_life_simple,
+            1: check_life_neighbor,
+            2: check_life_lifetime,
+            'life': check_life_simple,
+            'neighbor': check_life_neighbor,
+            'lifetime': check_life_lifetime,
+            }.get(options.track, check_life_simple)
+
     while True:
         draw_board(screen, board)
-        if options.track=="0": # only tracks life
-          board = check_life_simple(screen, board)
-        if options.track=="1": # tracks neighbors
-          board = check_life_neighbor(screen, board)
-        if options.track=="2": # tracks lifetime
-          board = check_life_lifetime(screen, board)
+        board = check_func(screen, board)
         screen.refresh()
         if pause_between_frames:
           screen.getch()
