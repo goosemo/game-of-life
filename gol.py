@@ -137,34 +137,47 @@ def draw_board(screen, board):
     """
     global options
 
-    chars = {
-            0:' ', 
-            1:'#', 
-            2:'*',
-            3:'o',
-            4:'`',
-            5:'"',
-            6:"'",
-            7:'-',
-            8:'.',
-            9:'x',
-            }
+    if options.foreground==' ':
+      chars = {
+          0:' ', 
+          1:'#', 
+          2:'*',
+          3:'o',
+          4:'`',
+          5:'"',
+          6:"'",
+          7:'-',
+          8:'.',
+          9:'x'}
+    else:
+      chars = {
+          0:' ', 
+          1:options.foreground, 
+          2:options.foreground, 
+          3:options.foreground, 
+          4:options.foreground, 
+          5:options.foreground, 
+          6:options.foreground, 
+          7:options.foreground, 
+          8:options.foreground,
+          9:options.foreground}
+
+    chars[0] = options.background
 
     color = 0
     if options.color:
-        colors ={
-                0:curses.color_pair(1),
-                1:curses.color_pair(1),
-                2:curses.color_pair(2),
-                3:curses.color_pair(3),
-                4:curses.color_pair(4),
-                5:curses.color_pair(1),
-                6:curses.color_pair(2),
-                7:curses.color_pair(3),
-                8:curses.color_pair(4),
-                9:curses.color_pair(5),
-        }
-
+      colors ={
+          0:curses.color_pair(5),
+          1:curses.color_pair(1),
+          2:curses.color_pair(2),
+          3:curses.color_pair(3),
+          4:curses.color_pair(4),
+          5:curses.color_pair(1),
+          6:curses.color_pair(2),
+          7:curses.color_pair(3),
+          8:curses.color_pair(4),
+          9:curses.color_pair(6),
+          }
 
     for row in range(len(board)):
         for col in range(len(board[0])):
@@ -329,11 +342,11 @@ def main(screen, pause_between_frames, filename):
         #Get some color settings in the works
         curses.start_color()
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
         curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
-
+        curses.init_pair(6, curses.COLOR_RED, curses.COLOR_BLACK)
 
 
     board = load_board(filename,new_board(screen_width,screen_height))
@@ -369,10 +382,17 @@ if __name__ == '__main__':
             default="0", action="store", metavar="#",
             help="sets what to track (0=disabled, 1=neighbors, 2=lifetime).")
 
-    parser.add_option("-f", "--format", dest="file_format",
+    parser.add_option("-o", "--format", dest="file_format",
             default="", action="store", metavar="FMT",
             help="will take either gol or rle as options.")
 
+    parser.add_option("-b", "--background", dest="background",
+            default=" ", action="store", metavar="CHAR",
+            help="sets the background character")
+
+    parser.add_option("-f", "--foreground", dest="foreground",
+            default=" ", action="store", metavar="CHAR",
+            help="sets the foreground character")
 
     (options, args) = parser.parse_args()
 
