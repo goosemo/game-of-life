@@ -4,6 +4,7 @@ import sys
 import string
 import curses
 import itertools
+import random
 
 from optparse import OptionParser
 
@@ -128,6 +129,12 @@ def new_board(screen_width, screen_height):
     create empty board
     """    
     return [[0 for i in range(screen_width)] for j in range(screen_height)]
+
+def random_board(screen_width, screen_height):
+    """
+    create random board
+    """    
+    return [[random.randint(0,1) for i in range(screen_width)] for j in range(screen_height)]
 
 
 def draw_board(screen, board):
@@ -336,7 +343,10 @@ def main(screen, pause_between_frames, filename):
         for i, (color, bg) in enumerate([(c, black) for c in colors], start=1):
             curses.init_pair(i, color, bg)
 
-    board = load_board(filename,new_board(screen_width,screen_height))
+    if options.random:
+      board = random_board(screen_width,screen_height)
+    else:
+      board = load_board(filename,new_board(screen_width,screen_height))
 
     check_func = {
             0: check_life_simple,
@@ -385,6 +395,10 @@ if __name__ == '__main__':
             default="", action="store", metavar="CHAR",
             help="sets the foreground character")
 
+    parser.add_option("-d", "--random", dest="random",
+            default=False, action="store_true",
+            help="creats a random board")
+
     (options, args) = parser.parse_args()
 
     files = []
@@ -395,6 +409,9 @@ if __name__ == '__main__':
 
         else:
             files.append(arg)
+
+    if options.random and not files:
+      files.append('random') # just to ensure we don't trip the no-file warning
 
     if not files:
         print "No files given, quitting."
