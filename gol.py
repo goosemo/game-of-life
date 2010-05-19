@@ -349,9 +349,9 @@ def main(screen, pause_between_frames, filename):
       board = load_board(filename,new_board(screen_width,screen_height))
 
     check_func = {
-            0: check_life_simple,
-            1: check_life_neighbor,
-            2: check_life_lifetime,
+            '0': check_life_simple,
+            '1': check_life_neighbor,
+            '2': check_life_lifetime,
             'simple': check_life_simple,
             'neighbor': check_life_neighbor,
             'lifetime': check_life_lifetime,
@@ -388,7 +388,7 @@ if __name__ == '__main__':
             help="sets whether to enable color or not.")
 
     parser.add_option("-t", "--track", dest="track",
-            default="0", action="store", metavar="#",
+            default="", action="store", metavar="#",
             help="sets what to track (0=simple, 1=neighbors, 2=lifetime).")
 
     parser.add_option("-o", "--format", dest="file_format",
